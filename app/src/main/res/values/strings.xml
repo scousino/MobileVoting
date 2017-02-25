@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MobileVoting</string>
+    <string name="beginButtonTitle">Begin Voting</string>
+    <string name="endButtonTitle">End Voting</string>
 </resources>

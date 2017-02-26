@@ -26,4 +26,6 @@ public class InitialSetup extends AppCompatActivity {
         });
     }
 
+    //Use a ScrollView and TextView to display the ID numbers as the user adds them
+
 }

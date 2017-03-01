@@ -1,21 +1,27 @@
 package edu.pitt.cs.cs1635.skc29.mobilevoting;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.Telephony;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.widget.TextView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     SmsManager defaultManager;
@@ -28,25 +34,35 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Integer> demoCandidates;
     private String ADMIN_NUMBER;
     private SQLiteDatabase database;
-    private SerialMessageExecutor voteExecutor;
     private VotingDatabase myDatabase;
+    private TextView resultDisplay;
+    private boolean debugging = true;
+    private ExecutorService ex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //Debugging setup
+        if(debugging) {
+            startVoting = true;
+            adminLoggedIn = true;
+            ADMIN_NUMBER = "6505551212";
+        }
+
+
+        //Must request permissions from user at runtime
+        permissionRequest();
+        resultDisplay = (TextView) findViewById(R.id.displayResults);
         //Database setup
         myDatabase = new VotingDatabase(this,demoCandidates);
 
         //SMS Stuff
         defaultManager = android.telephony.SmsManager.getDefault();
+
         //Set up Executor for processing the messages
-        voteExecutor = new SerialMessageExecutor(new Executor() {
-            @Override
-            public void execute(Runnable command) {
-                new Thread(command).start();
-            }
-        });
+        ex = Executors.newSingleThreadExecutor();
+
         //Create a receiver to handle incoming SMS messages
         mySmsReceiver = new BroadcastReceiver() {
             @Override
@@ -68,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                             messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                         }
                         //TODO check if this should be messageBody +=
-                        messageBody = messages[i].getMessageBody().toString();
+                        messageBody += messages[i].getMessageBody().toString();
                         phoneNumber = messages[i].getOriginatingAddress().toString();
                     }
 
@@ -107,10 +123,22 @@ public class MainActivity extends AppCompatActivity {
                                             // via phone number and candidate ID.
                                             //If valid, send vote to database. Otherwise respond
                                             //with appropriate message.
-                                            voteExecutor.execute(new DatabaseWorkRunnable(phoneNumber,
+                                            ex.execute(new DatabaseWorkRunnable(phoneNumber,
                                                     messageValue,defaultManager,myDatabase));
                                         }
                                         break;
+                                }
+                            }
+                            //Number is a voter
+                            else {
+                                if(startVoting) {
+                                    //Send vote to database to be verified and tallied
+                                    //Functions in the runnable will verify vote validity
+                                    // via phone number and candidate ID.
+                                    //If valid, send vote to database. Otherwise respond
+                                    //with appropriate message.
+                                    ex.execute(new DatabaseWorkRunnable(phoneNumber,
+                                            messageValue,defaultManager,myDatabase));
                                 }
                             }
                         }else {
@@ -126,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
         //Register the receiver for SMS
         registerReceiver(mySmsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
 
+    }
+
+    private void permissionRequest() {
+        int SMS_PERMISSIONS = 1;
+        String[] PERMISSIONS = {Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS,
+                                Manifest.permission.SEND_SMS};
+        if(!hasPermissions(PERMISSIONS)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(PERMISSIONS,SMS_PERMISSIONS);
+            }
+        }
+
+    }
+
+    private boolean hasPermissions(String[] permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissions != null) {
+            for(String permission : permissions) {
+                if(ContextCompat.checkSelfPermission(this,permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     //Sets up a list of dummy Candidate IDs for the database to initialize.
@@ -149,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mySmsReceiver);
+        myDatabase.clearDatabase();
     }
 
 }

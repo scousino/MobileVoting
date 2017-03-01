@@ -29,7 +29,7 @@ class DatabaseWorkRunnable implements Runnable {
     @Override
     public void run() {
         //Check if voter has already voted
-        if(!database.checkVoter(pNumber)) {
+        if(database.checkVoter(pNumber)) {
             //Send invalid voter response message
             textMessageManager.sendTextMessage(pNumber,null,INVALID_VOTER,null,null);
         }else {

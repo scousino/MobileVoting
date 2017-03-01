@@ -30,7 +30,7 @@ public class VotingDatabase {
     public boolean checkVoter(String phoneNumber){ //Checks to see if voter has voted before
         String[] cols = new String[]{COL_NUMBER};
         String[] whereArgs = new String[]{phoneNumber};
-        Cursor cursor = database.query(true, DB_NAME, cols, COL_NUMBER+"=?", whereArgs, null, null, null, null);
+        Cursor cursor = database.query(true, TABLE_NAME, cols, COL_NUMBER+"=?", whereArgs, null, null, null, null);
         if(cursor.moveToFirst()) //Exists, Return True
         {
             return true;
@@ -73,6 +73,10 @@ public class VotingDatabase {
         }
 
         return result;
+    }
+
+    public void clearDatabase() {
+        dbHandler.onUpgrade(database,1,2);
     }
 
     private class Result {

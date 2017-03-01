@@ -37,7 +37,7 @@ import android.content.Context;
         public void onCreate(SQLiteDatabase db)
         {
             String query = "CREATE TABLE " + TABLE_NAME + "(" +
-                    COL_NUMBER + " TEXT PRIMARY KEY " +
+                    COL_NUMBER + " TEXT PRIMARY KEY, " +
                     COL_CANDIDATE + " INTEGER " +
                     ");";
             db.execSQL(query); //Execute Query

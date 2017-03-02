@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private final String ADMIN_PASS_KEY = "1862";
     private final int BEGIN_VOTING = 700;
     private final int END_VOTING = 710;
+    private final int ADD_ID = 500;
     private boolean startVoting = false;
     private ArrayList<Integer> demoCandidates;
     private String ADMIN_NUMBER;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean debugging = true;
     private ExecutorService ex;
     private String VOTE_OVER_MSG = "Sorry, votes are currently not being accepted.";
+    private static boolean waitingForID = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,31 +112,46 @@ public class MainActivity extends AppCompatActivity {
                         if(validateMessage(messageBody)) {
                             int messageValue = Integer.parseInt(messageBody);
                             if(phoneNumber.equalsIgnoreCase(ADMIN_NUMBER)) {
-                                switch (messageValue) {
-                                    case BEGIN_VOTING:
-                                        startVoting = true;
-                                        //Create database? Or should I do it in onCreate.
-                                        sendResponseText("Votes can now be processed",ADMIN_NUMBER);
-                                        break;
-                                    case END_VOTING:
-                                        startVoting = false;
-                                        sendResponseText("Votes can no longer be accepted.",
-                                                phoneNumber);
-                                        stopVoting();
-                                        break;
-                                    default:    //This is the case where the message is just a vote
-                                        if(startVoting) {
-                                            //Send vote to database to be verified and tallied
-                                            //Functions in the runnable will verify vote validity
-                                            // via phone number and candidate ID.
-                                            //If valid, send vote to database. Otherwise respond
-                                            //with appropriate message.
-                                            ex.execute(new DatabaseWorkRunnable(phoneNumber,
-                                                    messageValue,defaultManager,myDatabase));
-                                        }else {
-                                            sendResponseText(VOTE_OVER_MSG,phoneNumber);
-                                        }
-                                        break;
+                                if(waitingForID) {
+                                    boolean success = myDatabase.addCandidate(messageValue);
+                                    if(success) {
+                                        sendResponseText("Candidate has been added",ADMIN_NUMBER);
+                                        waitingForID = false;
+                                    }else {
+                                        sendResponseText("Candidate already exists",ADMIN_NUMBER);
+                                    }
+                                }else {
+                                    switch (messageValue) {
+                                        case BEGIN_VOTING:
+                                            startVoting = true;
+                                            //Create database? Or should I do it in onCreate.
+                                            sendResponseText("Votes can now be processed",ADMIN_NUMBER);
+                                            break;
+                                        case END_VOTING:
+                                            startVoting = false;
+                                            sendResponseText("Votes can no longer be accepted.",
+                                                    phoneNumber);
+                                            stopVoting();
+                                            break;
+                                        case ADD_ID:
+                                            waitingForID = true;
+                                            sendResponseText("Please send the candidate ID you wish" +
+                                                    "to add.",ADMIN_NUMBER);
+                                            break;
+                                        default:    //This is the case where the message is just a vote
+                                            if(startVoting) {
+                                                //Send vote to database to be verified and tallied
+                                                //Functions in the runnable will verify vote validity
+                                                // via phone number and candidate ID.
+                                                //If valid, send vote to database. Otherwise respond
+                                                //with appropriate message.
+                                                ex.execute(new DatabaseWorkRunnable(phoneNumber,
+                                                        messageValue,defaultManager,myDatabase));
+                                            }else {
+                                                sendResponseText(VOTE_OVER_MSG,phoneNumber);
+                                            }
+                                            break;
+                                    }
                                 }
                             }
                             //Number is a voter

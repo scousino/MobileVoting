@@ -29,6 +29,16 @@ public class VotingDatabase {
         noVotes = new ArrayList<>(ids);
     }
 
+    //Returns true on success, and false if candidate already exists.
+    public boolean addCandidate(int candidate) {
+        if(candidates.contains(candidate)) {
+            return false;
+        }
+        candidates.add(candidate);
+        noVotes.add(candidate);
+        return true;
+    }
+
     public boolean checkVoter(String phoneNumber){ //Checks to see if voter has voted before
         String[] cols = new String[]{COL_NUMBER};
         String[] whereArgs = new String[]{phoneNumber};

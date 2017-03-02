@@ -39,7 +39,7 @@ class DatabaseWorkRunnable implements Runnable {
                 textMessageManager.sendTextMessage(pNumber,null,INVALID_CANDIDATE,null,null);
             }else {
                 //Passed both voter and candidate checks. Insert vote into database.
-                database.addVote(pNumber,candidate);
+                boolean result = database.addVote(pNumber,candidate);
                 //Send acknowledgment response
                 textMessageManager.sendTextMessage(pNumber,null,VALID_VOTE,null,null);
             }

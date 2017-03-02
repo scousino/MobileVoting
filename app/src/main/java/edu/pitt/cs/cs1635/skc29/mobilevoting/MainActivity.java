@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     SmsManager defaultManager;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView resultDisplay;
     private boolean debugging = true;
     private ExecutorService ex;
+    private String VOTE_OVER_MSG = "Sorry, votes are currently not being accepted.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
         permissionRequest();
         resultDisplay = (TextView) findViewById(R.id.displayResults);
         //Database setup
+        demoMode();
         myDatabase = new VotingDatabase(this,demoCandidates);
+        //TODO Fix after Milestone2
+        myDatabase.clearDatabase();
 
         //SMS Stuff
         defaultManager = android.telephony.SmsManager.getDefault();
@@ -115,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                                         startVoting = false;
                                         sendResponseText("Votes can no longer be accepted.",
                                                 phoneNumber);
+                                        stopVoting();
                                         break;
                                     default:    //This is the case where the message is just a vote
                                         if(startVoting) {
@@ -125,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
                                             //with appropriate message.
                                             ex.execute(new DatabaseWorkRunnable(phoneNumber,
                                                     messageValue,defaultManager,myDatabase));
+                                        }else {
+                                            sendResponseText(VOTE_OVER_MSG,phoneNumber);
                                         }
                                         break;
                                 }
@@ -139,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
                                     //with appropriate message.
                                     ex.execute(new DatabaseWorkRunnable(phoneNumber,
                                             messageValue,defaultManager,myDatabase));
+                                }else {
+                                    sendResponseText(VOTE_OVER_MSG,phoneNumber);
                                 }
                             }
                         }else {
@@ -154,6 +164,45 @@ public class MainActivity extends AppCompatActivity {
         //Register the receiver for SMS
         registerReceiver(mySmsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
 
+    }
+
+    private void stopVoting() {
+        //Launch ProgressDialog
+
+        //Unregister SMS Receiver so we no longer get text messages
+        unregisterReceiver(mySmsReceiver);
+        //Stop new tasks from being executed
+        ex.shutdown();
+        try {
+            //Give all the tasks 30 seconds to complete
+            if(!ex.awaitTermination(30, TimeUnit.SECONDS)) {
+                //Cancel any still running tasks
+                ex.shutdownNow();
+            }
+        }catch(InterruptedException e) {
+            //If main thread was interrupted, re-cancel tasks
+            ex.shutdownNow();
+            //Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+        //Test stuff
+        myDatabase.sqlTest();
+
+
+        //Get tally results
+        ArrayList<VotingDatabase.Result> results = myDatabase.getResults();
+        StringBuilder sb = new StringBuilder();
+        for(VotingDatabase.Result r : results) {
+            sb.append(r.toString());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                sb.append(System.lineSeparator());
+            }else {
+                sb.append(System.getProperty("line.seperator"));
+            }
+        }
+
+        //Send tally results to administrator
+        sendResponseText(sb.toString(),ADMIN_NUMBER);
     }
 
     private void permissionRequest() {

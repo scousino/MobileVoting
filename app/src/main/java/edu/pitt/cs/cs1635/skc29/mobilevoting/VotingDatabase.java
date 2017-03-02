@@ -19,12 +19,14 @@ public class VotingDatabase {
     public static final String TABLE_NAME = "VoterDatabase"; //Name of Our Phone Number Database
     public static final String COL_NUMBER = "Phone"; //Name of Column For Phone Numbers
     public static final String COL_CANDIDATE = "Candidate"; //Name of Column For Candidates
-    private final ArrayList<Integer> candidates;
+    private static ArrayList<Integer> candidates;
+    private static ArrayList<Integer> noVotes;
 
     public VotingDatabase(Context context, ArrayList<Integer> ids) {
         dbHandler = DatabaseHandler.getInstance(context);
         database = dbHandler.getWritableDatabase();
         candidates = ids;
+        noVotes = new ArrayList<>(ids);
     }
 
     public boolean checkVoter(String phoneNumber){ //Checks to see if voter has voted before
@@ -33,9 +35,10 @@ public class VotingDatabase {
         Cursor cursor = database.query(true, TABLE_NAME, cols, COL_NUMBER+"=?", whereArgs, null, null, null, null);
         if(cursor.moveToFirst()) //Exists, Return True
         {
+            cursor.close();
             return true;
         }
-
+        cursor.close();
         return false; //Doesn't Exist, Return False
     }
 
@@ -48,30 +51,43 @@ public class VotingDatabase {
     public boolean addVote(String phoneNumber, int candidateID) {
         if(!checkVoter(phoneNumber)) //Voter Hasn't Voted Yet
         {
-            ContentValues cv = new ContentValues();
-            cv.put(COL_NUMBER, phoneNumber);
-            cv.put(COL_CANDIDATE, candidateID);
-            if(database.insert(TABLE_NAME, null, cv) != -1)
-            {
-                return true;
-            }
+            database.execSQL("INSERT INTO "+TABLE_NAME+"("+COL_CANDIDATE+","+COL_NUMBER+") VALUES("
+                        +candidateID+","+phoneNumber+")");
+            noVotes.remove(noVotes.indexOf(candidateID));
+
         }
 
         return false;
     }
+    public void sqlTest() {
+        Cursor c = database.rawQuery("SELECT * FROM VoterDatabase",null);
+        boolean moreRows = c.moveToFirst();
+        int x = c.getInt(c.getColumnIndex("Candidate"));
+        x = 5 +5;
+        c.close();
+    }
 
     public ArrayList<Result> getResults() {
         ArrayList<Result> result = new ArrayList<Result>();
-        Cursor cursor = database.rawQuery("SELECT " + COL_CANDIDATE + ", COUNT(" + COL_CANDIDATE + ") AS VOTES FROM "
-                + TABLE_NAME + " GROUP BY COL_CANDIDATE ORDER BY VOTES DESC", null);
-        boolean moreRows = cursor.moveToFirst();
+        String countFunction = "COUNT("+COL_CANDIDATE+")";
+        String[] resultColumns = {COL_CANDIDATE,countFunction};
+        Cursor c = database.query(TABLE_NAME,resultColumns,null,null,COL_CANDIDATE,null,countFunction+"DESC");
+        boolean moreRows = c.moveToFirst();
 
-        while(moreRows)
-        {
-            result.add(new Result(cursor.getInt(0), cursor.getInt(1)));
-            moreRows = cursor.moveToNext();
+        while(moreRows) {
+            int ID = c.getInt(c.getColumnIndex(COL_CANDIDATE));
+            //We minus 1 from the votes to account for the initial rows in the table.
+            //These initial rows allow us to display candidates who received no votes easily.
+            int votes = c.getInt(c.getColumnIndex(countFunction));
+            result.add(new Result(ID,votes));
+            moreRows = c.moveToNext();
         }
+        c.close();
 
+        //Adds candidates that received no votes to the result
+        for(int x : noVotes) {
+            result.add(new Result(x,0));
+        }
         return result;
     }
 
@@ -79,14 +95,14 @@ public class VotingDatabase {
         dbHandler.onUpgrade(database,1,2);
     }
 
-    private class Result {
+    protected class Result {
         int candidate;
         int votes;
 
         public Result(int c, int v)
         {
-            c = candidate;
-            v = votes;
+            candidate = c;
+            votes = v;
         }
 
         public String toString()

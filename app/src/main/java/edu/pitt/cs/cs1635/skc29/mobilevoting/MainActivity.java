@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase database;
     private VotingDatabase myDatabase;
     private TextView resultDisplay;
-    private boolean debugging = true;
+    private boolean debugging = false;
     private ExecutorService ex;
     private String VOTE_OVER_MSG = "Sorry, votes are currently not being accepted.";
     private static boolean waitingForID = false;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         if(debugging) {
             startVoting = true;
             adminLoggedIn = true;
-            ADMIN_NUMBER = "6505551212";
+            ADMIN_NUMBER = "7246107369";
         }
 
 
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Unregister SMS Receiver so we no longer get text messages
         unregisterReceiver(mySmsReceiver);
+
         //Stop new tasks from being executed
         ex.shutdown();
         try {

@@ -6,21 +6,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class AddCandidates extends AppCompatActivity {
 
     ArrayList<Integer> candidates = new ArrayList<Integer>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_candidates);
 
-        Intent startingIntent = getIntent();
+        final Intent returnIntent = new Intent(); //Intent That Will Be Returned
 
-
-        Button addButton, doneButton;
+        Button addButton, doneButton; //Buttons In View
 
         addButton = (Button)findViewById(R.id.addButton);
         doneButton = (Button)findViewById(R.id.doneButton);
@@ -30,18 +31,31 @@ public class AddCandidates extends AppCompatActivity {
             public void onClick(View v) {
 
                 int newID;
-                newID = Integer.parseInt(((EditText)findViewById(R.id.id_field)).getText().toString());
+                TextView message = (TextView)findViewById(R.id.addScreen_message);
+                EditText enterField = (EditText)findViewById(R.id.id_field);
+                message.setText("");
+                newID = Integer.parseInt(enterField.getText().toString()); //Get Value
+
                 if(!checkCandidates(newID))
                 {
                     candidates.add(newID); //Add New ID
                 }
+
+                else
+                {
+                    message.setText("ID Already Exists In Candidate List!");
+                }
+
+                enterField.setText(""); //Clear Enter Field
             }
         });
 
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                returnIntent.putIntegerArrayListExtra("candidates", candidates);
+                setResult(1, returnIntent);
+                finish();
             }
         });
     }

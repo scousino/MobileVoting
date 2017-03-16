@@ -19,7 +19,7 @@ public class AddCandidates extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_candidates);
 
-        final Intent returnIntent = new Intent(); //Intent That Will Be Returned
+
 
         Button addButton, doneButton; //Buttons In View
 
@@ -46,13 +46,13 @@ public class AddCandidates extends AppCompatActivity {
                     message.setText("ID Already Exists In Candidate List!");
                 }
 
-                enterField.setText(""); //Clear Enter Field
             }
         });
 
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent returnIntent = new Intent(); //Intent That Will Be Returned
                 returnIntent.putIntegerArrayListExtra("candidates", candidates);
                 setResult(1, returnIntent);
                 finish();

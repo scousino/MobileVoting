@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean startVoting = false;
     private ArrayList<Integer> demoCandidates;
     private String ADMIN_NUMBER;
-    private SQLiteDatabase database;
     private VotingDatabase myDatabase;
     private TextView resultDisplay;
     private boolean debugging = false;

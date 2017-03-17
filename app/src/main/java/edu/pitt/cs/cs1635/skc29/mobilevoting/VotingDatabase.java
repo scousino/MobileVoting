@@ -29,6 +29,14 @@ public class VotingDatabase {
         noVotes = new ArrayList<>(ids);
     }
 
+    //Constructor which creates empty lists
+    public VotingDatabase(Context context) {
+        dbHandler = DatabaseHandler.getInstance(context);
+        database = dbHandler.getWritableDatabase();
+        candidates = new ArrayList<>();
+        noVotes = new ArrayList<>();
+    }
+
     //Returns true on success, and false if candidate already exists.
     public boolean addCandidate(int candidate) {
         if(candidates.contains(candidate)) {
@@ -37,6 +45,12 @@ public class VotingDatabase {
         candidates.add(candidate);
         noVotes.add(candidate);
         return true;
+    }
+
+    public void setCandidates(ArrayList<Integer> list) {
+        for(int x : list) {
+            this.addCandidate(x);
+        }
     }
 
     public boolean checkVoter(String phoneNumber){ //Checks to see if voter has voted before
@@ -69,13 +83,6 @@ public class VotingDatabase {
         }
 
         return false;
-    }
-    public void sqlTest() {
-        Cursor c = database.rawQuery("SELECT * FROM VoterDatabase",null);
-        boolean moreRows = c.moveToFirst();
-        int x = c.getInt(c.getColumnIndex("Candidate"));
-        x = 5 +5;
-        c.close();
     }
 
     public ArrayList<Result> getResults() {

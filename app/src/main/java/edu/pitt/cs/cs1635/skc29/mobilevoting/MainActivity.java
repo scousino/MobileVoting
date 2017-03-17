@@ -15,7 +15,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -41,11 +44,44 @@ public class MainActivity extends AppCompatActivity {
     private ExecutorService ex;
     private String VOTE_OVER_MSG = "Sorry, votes are currently not being accepted.";
     private static boolean waitingForID = false;
+    private Button beginButton;
+    private Button endButton;
+    private Button addCandButton;
+    private final int ADD_CANDIDATE_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Map buttons to variables
+        beginButton = (Button) findViewById(R.id.beginButton);
+        endButton = (Button) findViewById(R.id.endButton);
+        addCandButton = (Button) findViewById(R.id.addCandButton);
+
+        //Set listeners for buttons
+        beginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                beginVoting();
+            }
+        });
+
+        endButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopVoting();
+            }
+        });
+
+        addCandButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent(),ADD_CANDIDATE_REQUEST);
+            }
+        });
+
+
         //Debugging setup
         if(debugging) {
             startVoting = true;
@@ -57,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
         //Must request permissions from user at runtime
         permissionRequest();
         resultDisplay = (TextView) findViewById(R.id.displayResults);
+
         //Database setup
-        demoMode();
-        myDatabase = new VotingDatabase(this,demoCandidates);
+        myDatabase = new VotingDatabase(this);
         //TODO Fix after Milestone2
         myDatabase.clearDatabase();
 
@@ -89,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                         }
-                        //TODO check if this should be messageBody +=
+
                         messageBody += messages[i].getMessageBody().toString();
                         phoneNumber = messages[i].getOriginatingAddress().toString();
                     }
@@ -183,10 +219,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopVoting() {
-        //Launch ProgressDialog
+        //Stop allowing votes to be tallied and the correct response message sent
+        startVoting = false;
 
         //Unregister SMS Receiver so we no longer get text messages
         unregisterReceiver(mySmsReceiver);
+
+        //Display message to admin
+        Toast.makeText(this,"Votes can longer be accepted",Toast.LENGTH_SHORT).show();
+
+        //Launch ProgressDialog
+
+
 
         //Stop new tasks from being executed
         ex.shutdown();
@@ -202,9 +246,6 @@ public class MainActivity extends AppCompatActivity {
             //Preserve interrupt status
             Thread.currentThread().interrupt();
         }
-        //Test stuff
-        myDatabase.sqlTest();
-
 
         //Get tally results
         ArrayList<VotingDatabase.Result> results = myDatabase.getResults();
@@ -220,6 +261,13 @@ public class MainActivity extends AppCompatActivity {
 
         //Send tally results to administrator
         sendResponseText(sb.toString(),ADMIN_NUMBER);
+    }
+
+    private void beginVoting() {
+        startVoting = true;
+
+        //Display message to admin
+        Toast.makeText(this,"Votes can now be processed",Toast.LENGTH_SHORT).show();
     }
 
     private void permissionRequest() {
@@ -260,6 +308,18 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean validateMessage(String messageBody) {
         return android.text.TextUtils.isDigitsOnly(messageBody);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == ADD_CANDIDATE_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                //Set the list of candidates received from the activity
+                myDatabase.setCandidates(data.getIntegerArrayListExtra("candidates"));
+            }
+        }
     }
 
     @Override

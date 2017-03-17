@@ -54,7 +54,7 @@ public class AddCandidates extends AppCompatActivity {
             public void onClick(View v) {
                 Intent returnIntent = new Intent(); //Intent That Will Be Returned
                 returnIntent.putIntegerArrayListExtra("candidates", candidates);
-                setResult(1, returnIntent);
+                setResult(RESULT_OK, returnIntent);
                 finish();
             }
         });

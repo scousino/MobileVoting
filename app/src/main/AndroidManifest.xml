@@ -22,11 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".InitialSetup"
-            android:label="@string/title_activity_initial_setup"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AddCandidates"></activity>
     </application>
 

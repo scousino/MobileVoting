@@ -2,6 +2,7 @@
     <string name="app_name">MobileVoting</string>
     <string name="beginButtonTitle">Begin Voting</string>
     <string name="endButtonTitle">End Voting</string>
+    <string name="candidateButtonTitle">Add Candidates</string>
     <string name="title_activity_initial_setup">InitialSetup</string>
     <string name="id_prompt">Enter ID:</string>
     <string name="add_text">ADD</string>

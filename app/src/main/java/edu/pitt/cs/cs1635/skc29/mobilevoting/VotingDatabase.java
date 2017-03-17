@@ -85,6 +85,10 @@ public class VotingDatabase {
         return false;
     }
 
+    public boolean isCandidateEmpty() {
+        return candidates.isEmpty();
+    }
+
     public ArrayList<Result> getResults() {
         ArrayList<Result> result = new ArrayList<Result>();
         String countFunction = "COUNT("+COL_CANDIDATE+")";

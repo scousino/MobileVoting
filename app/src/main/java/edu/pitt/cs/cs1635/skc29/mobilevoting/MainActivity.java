@@ -42,8 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView resultDisplay;
     private boolean debugging = false;
     private ExecutorService ex;
-    private String VOTE_OVER_MSG = "Sorry, votes are currently not being accepted.";
-    private static boolean waitingForID = false;
+    private String VOTE_OVER_MSG_USER = "Sorry, votes are currently not being accepted.";
+    private String VOTE_START_MSG_ADMIN = "Votes can now be processed";
+    private String VOTE_END_MSG_ADMIN = "Votes can no longer be processed";
+    private final String NO_CANDIDATES_MSG_ADMIN = "Voting cannot begin until you enter at least one" +
+            " candidate ID";
     private Button beginButton;
     private Button endButton;
     private Button addCandButton;
@@ -130,84 +133,26 @@ public class MainActivity extends AppCompatActivity {
                         phoneNumber = messages[i].getOriginatingAddress().toString();
                     }
 
-                    //Launch uploader or send info in Intent, or spawn a background service
-
-                    //Delete this after Milestone 2
-                    if(!adminLoggedIn) {
-                        //Validate message contents
-                        if(messageBody.equalsIgnoreCase("Admin "+ADMIN_PASS_KEY)) {
-                            adminLoggedIn = true;
-                            ADMIN_NUMBER = phoneNumber;
-                            sendResponseText("Admin login accepted.",phoneNumber);
+                    //Process Message
+                    if(validateMessage(messageBody)) {
+                        int messageValue = Integer.parseInt(messageBody);
+                        //Number is a voter
+                        if(startVoting) {
+                            //Send vote to database to be verified and tallied
+                            //Functions in the runnable will verify vote validity
+                            // via phone number and candidate ID.
+                            //If valid, send vote to database. Otherwise respond
+                            //with appropriate message.
+                            ex.execute(new DatabaseWorkRunnable(phoneNumber,
+                                    messageValue,defaultManager,myDatabase));
                         }else {
-                            sendResponseText("Invalid admin login. Please try again.",phoneNumber);
+                            sendResponseText(VOTE_OVER_MSG_USER,phoneNumber);
                         }
                     }else {
-                        //Process Regular Message
-                        if(validateMessage(messageBody)) {
-                            int messageValue = Integer.parseInt(messageBody);
-                            if(phoneNumber.equalsIgnoreCase(ADMIN_NUMBER)) {
-                                if(waitingForID) {
-                                    boolean success = myDatabase.addCandidate(messageValue);
-                                    if(success) {
-                                        sendResponseText("Candidate has been added",ADMIN_NUMBER);
-                                        waitingForID = false;
-                                    }else {
-                                        sendResponseText("Candidate already exists",ADMIN_NUMBER);
-                                    }
-                                }else {
-                                    switch (messageValue) {
-                                        case BEGIN_VOTING:
-                                            startVoting = true;
-                                            //Create database? Or should I do it in onCreate.
-                                            sendResponseText("Votes can now be processed",ADMIN_NUMBER);
-                                            break;
-                                        case END_VOTING:
-                                            startVoting = false;
-                                            sendResponseText("Votes can no longer be accepted.",
-                                                    phoneNumber);
-                                            stopVoting();
-                                            break;
-                                        case ADD_ID:
-                                            waitingForID = true;
-                                            sendResponseText("Please send the candidate ID you wish" +
-                                                    "to add.",ADMIN_NUMBER);
-                                            break;
-                                        default:    //This is the case where the message is just a vote
-                                            if(startVoting) {
-                                                //Send vote to database to be verified and tallied
-                                                //Functions in the runnable will verify vote validity
-                                                // via phone number and candidate ID.
-                                                //If valid, send vote to database. Otherwise respond
-                                                //with appropriate message.
-                                                ex.execute(new DatabaseWorkRunnable(phoneNumber,
-                                                        messageValue,defaultManager,myDatabase));
-                                            }else {
-                                                sendResponseText(VOTE_OVER_MSG,phoneNumber);
-                                            }
-                                            break;
-                                    }
-                                }
-                            }
-                            //Number is a voter
-                            else {
-                                if(startVoting) {
-                                    //Send vote to database to be verified and tallied
-                                    //Functions in the runnable will verify vote validity
-                                    // via phone number and candidate ID.
-                                    //If valid, send vote to database. Otherwise respond
-                                    //with appropriate message.
-                                    ex.execute(new DatabaseWorkRunnable(phoneNumber,
-                                            messageValue,defaultManager,myDatabase));
-                                }else {
-                                    sendResponseText(VOTE_OVER_MSG,phoneNumber);
-                                }
-                            }
-                        }else {
-                            sendResponseText("Invalid vote. Text must contain only numbers.",
-                                    phoneNumber);
-                        }
+                        sendResponseText("Invalid vote. Text must contain only numbers.",
+                                phoneNumber);
                     }
+
                 }
             }
             //End of onReceive Implementation
@@ -226,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(mySmsReceiver);
 
         //Display message to admin
-        Toast.makeText(this,"Votes can longer be accepted",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,VOTE_END_MSG_ADMIN,Toast.LENGTH_SHORT).show();
 
-        //Launch ProgressDialog
+        //TODO Launch ProgressDialog
 
 
 
@@ -264,10 +209,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void beginVoting() {
-        startVoting = true;
+        //Ensure at least one candidate ID has been added
+        if(myDatabase.isCandidateEmpty()) {
+            Toast.makeText(this,NO_CANDIDATES_MSG_ADMIN,Toast.LENGTH_SHORT).show();
+        }else {
+            //TODO Prompt for admin passkey
 
-        //Display message to admin
-        Toast.makeText(this,"Votes can now be processed",Toast.LENGTH_SHORT).show();
+            //Allow votes to be processed
+            startVoting = true;
+
+            //Display message to admin
+            Toast.makeText(this,VOTE_START_MSG_ADMIN,Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void permissionRequest() {
@@ -302,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendResponseText(String message, String phoneNumber) {
-        //TODO set phoneNumber variable
         defaultManager.sendTextMessage(phoneNumber, null, message, null, null);
     }
 

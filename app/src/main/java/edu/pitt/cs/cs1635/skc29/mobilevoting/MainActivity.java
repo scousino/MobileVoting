@@ -1,6 +1,7 @@
 package edu.pitt.cs.cs1635.skc29.mobilevoting;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver mySmsReceiver;
     private boolean adminLoggedIn = false;
     private final String ADMIN_PASS_KEY = "1862";
-    private final int BEGIN_VOTING = 700;
-    private final int END_VOTING = 710;
-    private final int ADD_ID = 500;
     private boolean startVoting = false;
     private ArrayList<Integer> demoCandidates;
     private String ADMIN_NUMBER;
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         addCandButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(),ADD_CANDIDATE_REQUEST);
+                startActivityForResult(new Intent(MainActivity.this,AddCandidates.class),ADD_CANDIDATE_REQUEST);
             }
         });
 
@@ -204,8 +203,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        //TODO adapt for GUI interface
         //Send tally results to administrator
         sendResponseText(sb.toString(),ADMIN_NUMBER);
+
+        //TODO prompt for database destruction
     }
 
     private void beginVoting() {
@@ -213,15 +215,58 @@ public class MainActivity extends AppCompatActivity {
         if(myDatabase.isCandidateEmpty()) {
             Toast.makeText(this,NO_CANDIDATES_MSG_ADMIN,Toast.LENGTH_SHORT).show();
         }else {
-            //TODO Prompt for admin passkey
-
-            //Allow votes to be processed
-            startVoting = true;
-
-            //Display message to admin
-            Toast.makeText(this,VOTE_START_MSG_ADMIN,Toast.LENGTH_SHORT).show();
+            //Prompt for admin passkey
+            authenticateAdminAction();
         }
 
+    }
+
+    //Displays the dialog box which prompts for an administrator passkey
+    private void authenticateAdminAction() {
+        //Create the login dialog box
+        final Dialog login = new Dialog(this);
+        login.setContentView(R.layout.dialog_admin_passkey);
+        login.setTitle("Administrator Authentication");
+
+        //Initialize the variables for the GUI
+        Button loginBtn = (Button) findViewById(R.id.loginButton);
+        Button cancelBtn = (Button) findViewById(R.id.cancelButton);
+        final EditText passkeyInput = (EditText) findViewById(R.id.passkeyInput);
+
+        //Set onClickListeneres for both buttons
+        //loginBtn
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String enteredKey = passkeyInput.getText().toString().trim();
+                //Validate the string actually contains input
+                if(enteredKey.length() > 0) {
+                    if(ADMIN_PASS_KEY.equalsIgnoreCase(enteredKey)) {
+                        //Allow votes to be processed
+                        startVoting = true;
+                        //Show feedback to user
+                        Toast.makeText(MainActivity.this,VOTE_START_MSG_ADMIN,Toast.LENGTH_SHORT).show();
+                        login.dismiss();
+                    }else {
+                        //Show feedback to user
+                        Toast.makeText(MainActivity.this,"Invalid passkey",Toast.LENGTH_SHORT).show();
+                        login.dismiss();
+                    }
+                }
+            }
+        });
+
+        //cancelBtn
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Show feedback to user
+                Toast.makeText(MainActivity.this,"Login cancelled",Toast.LENGTH_SHORT).show();
+                login.dismiss();
+            }
+        });
+
+        login.show();
     }
 
     private void permissionRequest() {

@@ -19,8 +19,6 @@ public class AddCandidates extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_candidates);
 
-
-
         Button addButton, doneButton; //Buttons In View
 
         addButton = (Button)findViewById(R.id.addButton);
@@ -34,16 +32,20 @@ public class AddCandidates extends AppCompatActivity {
                 TextView message = (TextView)findViewById(R.id.addScreen_message);
                 EditText enterField = (EditText)findViewById(R.id.id_field);
                 message.setText("");
-                newID = Integer.parseInt(enterField.getText().toString()); //Get Value
-
-                if(!checkCandidates(newID))
-                {
-                    candidates.add(newID); //Add New ID
-                }
-
-                else
-                {
-                    message.setText("ID Already Exists In Candidate List!");
+                if(enterField.getText().toString().trim().length() > 0) {
+                    newID = Integer.parseInt(enterField.getText().toString().trim()); //Get Value
+                    if(!checkCandidates(newID))
+                    {
+                        candidates.add(newID); //Add New ID
+                        message.setText("ID successfully added!");
+                        enterField.setText("");
+                    }
+                    else
+                    {
+                        message.setText("ID Already Exists In Candidate List!");
+                    }
+                }else {
+                    message.setText("You must enter an ID number.");
                 }
 
             }

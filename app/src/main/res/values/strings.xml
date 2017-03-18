@@ -7,5 +7,6 @@
     <string name="id_prompt">Enter ID:</string>
     <string name="add_text">ADD</string>
     <string name="done_text">DONE</string>
+    <string name="passkey_prompt">Passkey:</string>
 
 </resources>

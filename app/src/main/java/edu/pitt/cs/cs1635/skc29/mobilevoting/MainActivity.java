@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                         }
-                        //TODO check if this should be messageBody +=
+                        //Retrieve the message body and the phone number which sent the message
                         messageBody += messages[i].getMessageBody().toString();
                         phoneNumber = messages[i].getOriginatingAddress().toString();
                     }
@@ -254,7 +254,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendResponseText(String message, String phoneNumber) {
-        //TODO set phoneNumber variable
+        //Invoke the Android OS to send a message using whatever the phone
+        //running the app has chosen as its default SMS messaging app
         defaultManager.sendTextMessage(phoneNumber, null, message, null, null);
     }
 

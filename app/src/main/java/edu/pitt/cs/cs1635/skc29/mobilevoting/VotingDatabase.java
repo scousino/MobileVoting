@@ -116,7 +116,12 @@ public class VotingDatabase {
     }
 
     public void clearDatabase() {
-        dbHandler.onUpgrade(database,1,2);
+        //Reset lists
+        candidates.clear();
+        noVotes.clear();
+
+        //Reset the contents of the database
+        dbHandler.onUpgrade(database,database.getVersion(),database.getVersion() + 1);
     }
 
     protected class Result {

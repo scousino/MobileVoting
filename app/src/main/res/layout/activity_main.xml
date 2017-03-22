@@ -23,7 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:id="@+id/myLinLayout">
+            android:id="@+id/myResultLayout"
+            android:visibility="invisible">
         </LinearLayout>
         
     </ScrollView>

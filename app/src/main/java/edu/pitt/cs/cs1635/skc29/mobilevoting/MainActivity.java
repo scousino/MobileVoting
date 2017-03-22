@@ -5,14 +5,14 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.Telephony;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -23,10 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
     SmsManager defaultManager;
     BroadcastReceiver mySmsReceiver;
-    private boolean adminLoggedIn = false;
     private final String ADMIN_PASS_KEY = "1862";
     private boolean startVoting = false;
     private ArrayList<Integer> demoCandidates;
@@ -50,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Button endButton;
     private Button addCandButton;
     private final int ADD_CANDIDATE_REQUEST = 1;
+    private LinearLayout myResultLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,27 +203,59 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        //Close progress box
+        //Close progress dialog
         progress.dismiss();
-        //Display tally results
-        displayResults();
 
-        //TODO prompt for database destruction
+        //Compile tally results
+        compileResults();
 
+        //Prompt for database destruction
+        databaseDestructPrompt();
+
+        //Display results
+        myResultLayout.setVisibility(View.VISIBLE);
+
+        //Disable/Enable appropriate buttons
+        addCandButton.setEnabled(true);
+        endButton.setEnabled(false);
     }
 
-    private void displayResults() {
+    private void databaseDestructPrompt() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int buttonClicked) {
+                switch (buttonClicked){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        //Do nothing
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        myDatabase.clearDatabase();
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Would you like to reset the list of candidates?");
+        builder.setPositiveButton("Yes", dialogClickListener);
+        builder.setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void compileResults() {
         //Init layout variable to add TextViews containing the final results
-        LinearLayout myLayout = (LinearLayout) findViewById(R.id.myLinLayout);
+        myResultLayout = (LinearLayout) findViewById(R.id.myResultLayout);
 
         //Retrieve the final results
         ArrayList<VotingDatabase.Result> resList = myDatabase.getResults();
 
         for(VotingDatabase.Result x : resList) {
             //Create a TextView variable to store result info and store in myLayout
-            TextView results = new TextView(myLayout.getContext());
+            TextView results = new TextView(myResultLayout.getContext());
             results.setText(x.toString());
-            myLayout.addView(results);
+            myResultLayout.addView(results);
         }
 
     }
@@ -238,6 +267,10 @@ public class MainActivity extends AppCompatActivity {
         }else {
             //Prompt for admin passkey
             authenticateAdminAction();
+            //Disable/Enable appropriate buttons
+            addCandButton.setEnabled(false);    //Candidates cannot be added once voting has begun
+            beginButton.setEnabled(false);
+            endButton.setEnabled(true);
         }
 
     }
@@ -337,6 +370,11 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 //Set the list of candidates received from the activity
                 myDatabase.setCandidates(data.getIntegerArrayListExtra("candidates"));
+                if(!myDatabase.isCandidateEmpty()) {
+                    beginButton.setEnabled(true);
+                    endButton.setEnabled(false);
+                }
+
             }
         }
     }

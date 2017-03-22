@@ -77,8 +77,10 @@ public class VotingDatabase {
         {
             database.execSQL("INSERT INTO "+TABLE_NAME+"("+COL_CANDIDATE+","+COL_NUMBER+") VALUES("
                         +candidateID+","+phoneNumber+")");
-            //TODO Check if noVotes contains the candidate
-            noVotes.remove(noVotes.indexOf(candidateID));
+            //Check if noVotes contains the candidate
+            if(noVotes.contains(candidateID)) {
+                noVotes.remove(noVotes.indexOf(candidateID));
+            }
 
         }
 
@@ -131,5 +133,6 @@ public class VotingDatabase {
         {
             return "Candidate: " + candidate + " --- Votes: " + votes;
         }
+
     }
 }

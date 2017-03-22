@@ -2,6 +2,7 @@ package edu.pitt.cs.cs1635.skc29.mobilevoting;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.telephony.SmsMessage;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,9 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private final String ADMIN_PASS_KEY = "1862";
     private boolean startVoting = false;
     private ArrayList<Integer> demoCandidates;
-    private String ADMIN_NUMBER;
     private VotingDatabase myDatabase;
-    private TextView resultDisplay;
     private boolean debugging = false;
     private ExecutorService ex;
     private String VOTE_OVER_MSG_USER = "Sorry, votes are currently not being accepted.";
@@ -87,14 +87,11 @@ public class MainActivity extends AppCompatActivity {
         //Debugging setup
         if(debugging) {
             startVoting = true;
-            adminLoggedIn = true;
-            ADMIN_NUMBER = "7246107369";
         }
 
 
         //Must request permissions from user at runtime
         permissionRequest();
-        resultDisplay = (TextView) findViewById(R.id.displayResults);
 
         //Database setup
         myDatabase = new VotingDatabase(this);
@@ -172,9 +169,14 @@ public class MainActivity extends AppCompatActivity {
         //Display message to admin
         Toast.makeText(this,VOTE_END_MSG_ADMIN,Toast.LENGTH_SHORT).show();
 
-        //TODO Launch ProgressDialog
-
-
+        //Create and Launch ProgressDialog
+        ProgressDialog progress;
+        progress = new ProgressDialog(this);
+        progress.setCancelable(false);
+        progress.setMessage("Tallying the final resultss");
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setProgress(0);
+        progress.show();
 
         //Stop new tasks from being executed
         ex.shutdown();
@@ -203,11 +205,30 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //TODO adapt for GUI interface
-        //Send tally results to administrator
-        sendResponseText(sb.toString(),ADMIN_NUMBER);
+
+        //Close progress box
+        progress.dismiss();
+        //Display tally results
+        displayResults();
 
         //TODO prompt for database destruction
+
+    }
+
+    private void displayResults() {
+        //Init layout variable to add TextViews containing the final results
+        LinearLayout myLayout = (LinearLayout) findViewById(R.id.myLinLayout);
+
+        //Retrieve the final results
+        ArrayList<VotingDatabase.Result> resList = myDatabase.getResults();
+
+        for(VotingDatabase.Result x : resList) {
+            //Create a TextView variable to store result info and store in myLayout
+            TextView results = new TextView(myLayout.getContext());
+            results.setText(x.toString());
+            myLayout.addView(results);
+        }
+
     }
 
     private void beginVoting() {

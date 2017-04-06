@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="edu.pitt.cs.cs1635.skc29.mobilevoting.ScriptTester">
+
+
+    <TextView
+        android:id="@+id/testPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/test_prompt"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/testCode"
+        android:layout_width="match_parent"
+        android:layout_height="@android:dimen/thumbnail_height"
+        android:ems="10"
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_button" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/code_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="@string/code_untested"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="96dip"
+            android:layout_height="96dip"
+            android:layout_weight="1"
+            app:srcCompat="@mipmap/code_untested" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/additional_comments_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/additional_comments"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/additional_comments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

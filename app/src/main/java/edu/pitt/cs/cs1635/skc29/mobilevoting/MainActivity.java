@@ -278,14 +278,15 @@ public class MainActivity extends AppCompatActivity {
     //Displays the dialog box which prompts for an administrator passkey
     private void authenticateAdminAction() {
         //Create the login dialog box
-        final Dialog login = new Dialog(this);
+        final Dialog login = new Dialog(MainActivity.this);
         login.setContentView(R.layout.dialog_admin_passkey);
         login.setTitle("Administrator Authentication");
 
         //Initialize the variables for the GUI
-        Button loginBtn = (Button) findViewById(R.id.loginButton);
-        Button cancelBtn = (Button) findViewById(R.id.cancelButton);
-        final EditText passkeyInput = (EditText) findViewById(R.id.passkeyInput);
+
+        Button loginBtn = (Button) login.findViewById(R.id.loginButton);
+        Button cancelBtn = (Button) login.findViewById(R.id.cancelButton);
+        final EditText passkeyInput = (EditText) login.findViewById(R.id.passkeyInput);
 
         //Set onClickListeneres for both buttons
         //loginBtn

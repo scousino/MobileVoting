@@ -6,6 +6,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.StringTokenizer;
+
 public class ScriptTester extends AppCompatActivity {
 
     @Override
@@ -23,8 +25,32 @@ public class ScriptTester extends AppCompatActivity {
         });
     }
 
-    private void runCodeSimulation(String code) //Function To Test Code
+    private boolean runCodeSimulation(String code) //Function To Test Code
     {
+        StringTokenizer stringTokenizer = new StringTokenizer(code, "\n", false);
+        AddCandidates addCandidates = new AddCandidates(); //AddCandidates Class
+        if(stringTokenizer.nextToken().equalsIgnoreCase("ADD")) //Add Candidates
+        {
+                String nextToken = stringTokenizer.nextToken();
+                while(true)
+                {
+                    if(nextToken.equals("BEGIN") && !addCandidates.candidates.isEmpty())
+                    {
+                        break;
+                    }
+                    else {
+                        if (!(addCandidates.checkCandidates(Integer.parseInt(nextToken)))) {
+                            addCandidates.candidates.add(Integer.parseInt(nextToken));
+                        } else
+                            return false;
 
+                        nextToken = stringTokenizer.nextToken();
+                    }
+                }
+
+                //Begin Voting
+        }
+
+        return false;
     }
 }

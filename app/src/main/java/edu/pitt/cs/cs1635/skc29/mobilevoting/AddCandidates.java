@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class AddCandidates extends AppCompatActivity {
 
-    ArrayList<Integer> candidates = new ArrayList<Integer>();
+    protected ArrayList<Integer> candidates = new ArrayList<Integer>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class AddCandidates extends AppCompatActivity {
         });
     }
 
-    private boolean checkCandidates(int newID)
+    protected boolean checkCandidates(int newID)
     {
         if(candidates.contains((Integer)newID))
         {

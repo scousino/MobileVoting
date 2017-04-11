@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private Button addCandButton;
     private final int ADD_CANDIDATE_REQUEST = 1;
     private LinearLayout myResultLayout;
+    private boolean receiverRegistered = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         //End of BroadcastReceiver Implementation
         //Register the receiver for SMS
         registerReceiver(mySmsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
-
+        receiverRegistered = true;
     }
 
     private void stopVoting() {
@@ -161,7 +163,10 @@ public class MainActivity extends AppCompatActivity {
         startVoting = false;
 
         //Unregister SMS Receiver so we no longer get text messages
-        unregisterReceiver(mySmsReceiver);
+        if(receiverRegistered) {
+            unregisterReceiver(mySmsReceiver);
+            receiverRegistered = false;
+        }
 
         //Display message to admin
         Toast.makeText(this,VOTE_END_MSG_ADMIN,Toast.LENGTH_SHORT).show();
@@ -170,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         ProgressDialog progress;
         progress = new ProgressDialog(this);
         progress.setCancelable(false);
-        progress.setMessage("Tallying the final resultss");
+        progress.setMessage("Tallying the final results");
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setProgress(0);
         progress.show();
@@ -227,19 +232,20 @@ public class MainActivity extends AppCompatActivity {
                 switch (buttonClicked){
                     case DialogInterface.BUTTON_POSITIVE:
                         //Yes button clicked
-                        //Do nothing
+                        //Clear database
+                        myDatabase.clearDatabase();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
                         //No button clicked
-                        myDatabase.clearDatabase();
+                        //Do nothing
                         break;
                 }
             }
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage("Would you like to reset the list of candidates?");
+        builder.setMessage("Would you like to destroy the database and reset the list of candidates?");
         builder.setPositiveButton("Yes", dialogClickListener);
         builder.setNegativeButton("No", dialogClickListener).show();
     }
@@ -255,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
             //Create a TextView variable to store result info and store in myLayout
             TextView results = new TextView(myResultLayout.getContext());
             results.setText(x.toString());
+            results.setTextSize(TypedValue.COMPLEX_UNIT_SP,20);
             myResultLayout.addView(results);
         }
 

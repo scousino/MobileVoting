@@ -50,6 +50,7 @@ public class ScriptTester extends AppCompatActivity {
             if(addCandidates.candidates.isEmpty()) //Nothing In List, No Candidates To Vote For
                     return false;
 
+            //TODO Delete this code, it's not needed for testing
             Button beginButton = (Button)findViewById(R.id.beginButton);
             beginButton.performClick(); //Click Begin Button
 

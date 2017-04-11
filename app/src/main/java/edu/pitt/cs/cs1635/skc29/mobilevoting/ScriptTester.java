@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.text.NumberFormat;
 import java.util.StringTokenizer;
 
 public class ScriptTester extends AppCompatActivity {
@@ -31,22 +32,39 @@ public class ScriptTester extends AppCompatActivity {
         AddCandidates addCandidates = new AddCandidates(); //AddCandidates Class
         if(stringTokenizer.nextToken().equalsIgnoreCase("ADD")) //Add Candidates
         {
-                String nextToken = stringTokenizer.nextToken();
-                while(true)
-                {
-                    if(nextToken.equals("BEGIN") && !addCandidates.candidates.isEmpty())
-                    {
-                        break;
-                    }
-                    else {
-                        if (!(addCandidates.checkCandidates(Integer.parseInt(nextToken)))) {
-                            addCandidates.candidates.add(Integer.parseInt(nextToken));
-                        } else
-                            return false;
-
-                        nextToken = stringTokenizer.nextToken();
-                    }
+            String nextToken = stringTokenizer.nextToken();
+            try { //Inserts all the candidates
+                while (true) {
+                    if (!addCandidates.checkCandidates(Integer.parseInt(nextToken))) {
+                        addCandidates.candidates.add(Integer.parseInt(nextToken));
+                    } else
+                        return false;
                 }
+            }
+            catch (NumberFormatException e) //Number is a Word
+            {
+                if(!nextToken.equalsIgnoreCase("BEGIN"))
+                    return false;
+            }
+
+            if(addCandidates.candidates.isEmpty()) //Nothing In List, No Candidates To Vote For
+                    return false;
+
+            Button beginButton = (Button)findViewById(R.id.beginButton);
+            beginButton.performClick(); //Click Begin Button
+
+            MainActivity main = new MainActivity();
+            String phoneNum, voteID;
+            while(true)
+            {
+                phoneNum = stringTokenizer.nextToken();
+                voteID = stringTokenizer.nextToken();
+
+            }
+
+
+
+
 
                 //Begin Voting
         }

@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Integer> demoCandidates;
     private VotingDatabase myDatabase;
     private boolean debugging = false;
-    private ExecutorService ex;
+    protected ExecutorService ex;
     private String VOTE_OVER_MSG_USER = "Sorry, votes are currently not being accepted.";
     private String VOTE_START_MSG_ADMIN = "Votes can now be processed";
     private String VOTE_END_MSG_ADMIN = "Votes can no longer be processed";

@@ -23,7 +23,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddCandidates" />
-        <activity android:name=".ScriptTester"></activity>
     </application>
 
 </manifest>

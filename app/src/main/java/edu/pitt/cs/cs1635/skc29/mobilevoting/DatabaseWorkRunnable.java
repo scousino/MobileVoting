@@ -17,13 +17,19 @@ class DatabaseWorkRunnable implements Runnable {
     private String INVALID_VOTER = "Sorry, you have already voted today! You can only vote once.";
     private String INVALID_CANDIDATE = "You have entered an ID that does not exist. Please try again";
     private String VALID_VOTE = "Your vote has been accepted!";
+    private boolean testFlag;
 
     //Include db as third parameter in constructor
-    DatabaseWorkRunnable(String number, int id, SmsManager txtManager, VotingDatabase db) {
+    DatabaseWorkRunnable(String number, int id, SmsManager txtManager, VotingDatabase db, boolean test) {
         pNumber = number;
         candidate = id;
         textMessageManager = txtManager;
         database = db;
+        testFlag = test;
+    }
+
+    DatabaseWorkRunnable(String number, int id, SmsManager txtManager, VotingDatabase db) {
+        this(number,id,txtManager,db,false);
     }
 
     @Override

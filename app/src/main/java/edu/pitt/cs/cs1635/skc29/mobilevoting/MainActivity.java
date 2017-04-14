@@ -429,6 +429,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         Toast.makeText(this, "ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
+                        //Close input streams and readers
+                        fileReader.close();
+                        stream.close();
                         return;
                     }
 
@@ -454,6 +457,9 @@ public class MainActivity extends AppCompatActivity {
                     else
                     {
                         Toast.makeText(this,  "ERROR - DUPLICATE PHONE NUMBER", Toast.LENGTH_LONG).show();
+                        //Close input streams and readers
+                        fileReader.close();
+                        stream.close();
                         return;
                     }
 
@@ -468,6 +474,11 @@ public class MainActivity extends AppCompatActivity {
 
                 stopVoting();
                 Toast.makeText(this,  "CODE TEST SUCCESSFUL", Toast.LENGTH_LONG).show();
+
+                //Close input streams and readers
+                fileReader.close();
+                stream.close();
+
 
             }
         }

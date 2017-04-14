@@ -427,9 +427,8 @@ public class MainActivity extends AppCompatActivity {
                     {
                         candidates.add(Integer.parseInt(nextID));
                     }
-                    else
-                    {
-                        Toast.makeText(this,  "ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
+                    else {
+                        Toast.makeText(this, "ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
                         return;
                     }
 

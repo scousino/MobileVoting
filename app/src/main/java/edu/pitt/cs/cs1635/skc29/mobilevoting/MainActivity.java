@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
 
                 for(int i = 0; i < phoneNumbers.size(); i++)
                 {
-                    ex.execute(new DatabaseWorkRunnable(phoneNumbers.get(i), votes.get(i),defaultManager,myDatabase));
+                    ex.execute(new DatabaseWorkRunnable(phoneNumbers.get(i), votes.get(i),defaultManager,myDatabase,true));
                 }
 
                 stopVoting();

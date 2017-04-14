@@ -37,17 +37,23 @@ class DatabaseWorkRunnable implements Runnable {
         //Check if voter has already voted
         if(database.checkVoter(pNumber)) {
             //Send invalid voter response message
-            textMessageManager.sendTextMessage(pNumber,null,INVALID_VOTER,null,null);
+            if(!testFlag) {
+                textMessageManager.sendTextMessage(pNumber,null,INVALID_VOTER,null,null);
+            }
         }else {
             //Check if candidate exists
             if(!database.checkCandidate(candidate)) {
                 //Send invalid candidate response message
-                textMessageManager.sendTextMessage(pNumber,null,INVALID_CANDIDATE,null,null);
+                if(!testFlag) {
+                    textMessageManager.sendTextMessage(pNumber,null,INVALID_CANDIDATE,null,null);
+                }
             }else {
                 //Passed both voter and candidate checks. Insert vote into database.
                 boolean result = database.addVote(pNumber,candidate);
                 //Send acknowledgment response
-                textMessageManager.sendTextMessage(pNumber,null,VALID_VOTE,null,null);
+                if(!testFlag) {
+                    textMessageManager.sendTextMessage(pNumber,null,VALID_VOTE,null,null);
+                }
             }
         }
 

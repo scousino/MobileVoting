@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private final int ADD_CANDIDATE_REQUEST = 1;
     private LinearLayout myResultLayout;
     private boolean receiverRegistered = false;
+    private int numTestRun = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -408,6 +409,10 @@ public class MainActivity extends AppCompatActivity {
     //Method for Testing Code
     private void testSimulator()
     {
+        numTestRun++;
+        if(numTestRun > 1) {
+            ex = Executors.newSingleThreadExecutor();
+        }
         InputStream stream = getResources().openRawResource(R.raw.testfile);
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(stream));
         try
@@ -428,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
                         candidates.add(Integer.parseInt(nextID));
                     }
                     else {
-                        Toast.makeText(this, "ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,"ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
                         //Close input streams and readers
                         fileReader.close();
                         stream.close();
@@ -456,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else
                     {
-                        Toast.makeText(this,  "ERROR - DUPLICATE PHONE NUMBER", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,"ERROR - DUPLICATE PHONE NUMBER", Toast.LENGTH_LONG).show();
                         //Close input streams and readers
                         fileReader.close();
                         stream.close();
@@ -473,7 +478,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 stopVoting();
-                Toast.makeText(this,  "CODE TEST SUCCESSFUL", Toast.LENGTH_LONG).show();
+                Toast.makeText(this,"CODE TEST SUCCESSFUL", Toast.LENGTH_LONG).show();
 
                 //Close input streams and readers
                 fileReader.close();

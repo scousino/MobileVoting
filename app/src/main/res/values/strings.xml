@@ -13,7 +13,5 @@
     <string name="test_prompt">Please Paste The Code You Wish To Test\nSeparate Each Command On a New Line</string>
     <string name="results_prompt">Your Code Is</string>
     <string name="additional_comments">Additional Comments</string>
-    <string name="code_untested">Code Untested</string>
-    <string name="code_pass">Code Passed</string>
-    <string name="code_fail">Code Failed</string>
+    <string name="test_code">Code Untested</string>
 </resources>

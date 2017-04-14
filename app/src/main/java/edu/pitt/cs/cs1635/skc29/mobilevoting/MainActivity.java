@@ -18,13 +18,24 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Integer> demoCandidates;
     private VotingDatabase myDatabase;
     private boolean debugging = false;
-    protected ExecutorService ex;
+    private ExecutorService ex;
     private String VOTE_OVER_MSG_USER = "Sorry, votes are currently not being accepted.";
     private String VOTE_START_MSG_ADMIN = "Votes can now be processed";
     private String VOTE_END_MSG_ADMIN = "Votes can no longer be processed";
@@ -392,6 +403,102 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(mySmsReceiver);
         myDatabase.clearDatabase();
+    }
+
+    //Method for Testing Code
+    private void testSimulator()
+    {
+        InputStream stream = getResources().openRawResource(R.raw.testfile);
+        BufferedReader fileReader = new BufferedReader(new InputStreamReader(stream));
+        try
+        {
+            if(!fileReader.readLine().equals("ADD"))
+            {
+                Toast.makeText(this, "FILE FORMAT ERROR - NO ADD COMMAND", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                ArrayList<Integer> candidates = new ArrayList<Integer>();
+                String nextID;
+                nextID = fileReader.readLine();
+                while(!nextID.equals("BEGIN")) //Adds Candidate IDs
+                {
+                    if(!candidates.contains((Integer.parseInt(nextID))))
+                    {
+                        candidates.add(Integer.parseInt(nextID));
+                    }
+                    else
+                    {
+                        Toast.makeText(this,  "ERROR - DUPLICATE CANDIDATE ID", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    nextID = fileReader.readLine();
+                }
+
+                myDatabase.setCandidates(candidates); //Add Candidates Officially
+
+                ArrayList<Integer> votes = new ArrayList<Integer>();
+                ArrayList<String> phoneNumbers = new ArrayList<String>();
+
+                String nextVote, nextPhone;
+                nextPhone = fileReader.readLine();
+                nextVote = fileReader.readLine();
+
+                while(!nextPhone.equals("END")) //Adds Candidate IDs
+                {
+                    if(!phoneNumbers.contains(nextPhone))
+                    {
+                        phoneNumbers.add(nextPhone);
+                        votes.add(Integer.parseInt(nextVote));
+                    }
+                    else
+                    {
+                        Toast.makeText(this,  "ERROR - DUPLICATE PHONE NUMBER", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    nextPhone = fileReader.readLine();
+                    nextVote = fileReader.readLine();
+                }
+
+                for(int i = 0; i < phoneNumbers.size(); i++)
+                {
+                    ex.execute(new DatabaseWorkRunnable(phoneNumbers.get(i), votes.get(i),defaultManager,myDatabase));
+                }
+
+                stopVoting();
+                Toast.makeText(this,  "CODE TEST SUCCESSFUL", Toast.LENGTH_LONG).show();
+
+            }
+        }
+
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_test:
+                testSimulator();
+                return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
     }
 
 }

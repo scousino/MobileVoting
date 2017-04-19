@@ -90,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
         addCandButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(MainActivity.this,AddCandidates.class),ADD_CANDIDATE_REQUEST);
+                ArrayList<Integer> dbCandidates = myDatabase.getCandidatesCopy();
+                Intent i = new Intent(MainActivity.this,AddCandidates.class);
+                i.putIntegerArrayListExtra("dbCandidates",dbCandidates);
+                startActivityForResult(i,ADD_CANDIDATE_REQUEST);
             }
         });
 

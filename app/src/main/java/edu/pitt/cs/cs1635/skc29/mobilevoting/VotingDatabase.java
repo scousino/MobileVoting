@@ -19,6 +19,8 @@ public class VotingDatabase {
     public static final String TABLE_NAME = "VoterDatabase"; //Name of Our Phone Number Database
     public static final String COL_NUMBER = "Phone"; //Name of Column For Phone Numbers
     public static final String COL_CANDIDATE = "Candidate"; //Name of Column For Candidates
+
+
     private static ArrayList<Integer> candidates;
     private static ArrayList<Integer> noVotes;
 
@@ -51,6 +53,11 @@ public class VotingDatabase {
         for(int x : list) {
             this.addCandidate(x);
         }
+    }
+
+    public static ArrayList<Integer> getCandidatesCopy() {
+        ArrayList<Integer> x = (ArrayList<Integer>) candidates.clone();
+        return x;
     }
 
     public boolean checkVoter(String phoneNumber){ //Checks to see if voter has voted before

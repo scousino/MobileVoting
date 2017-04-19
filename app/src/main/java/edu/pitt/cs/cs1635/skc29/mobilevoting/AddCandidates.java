@@ -19,6 +19,8 @@ public class AddCandidates extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_candidates);
 
+        candidates = getIntent().getIntegerArrayListExtra("dbCandidates");
+
         Button addButton, doneButton; //Buttons In View
 
         addButton = (Button)findViewById(R.id.addButton);
@@ -64,7 +66,7 @@ public class AddCandidates extends AppCompatActivity {
 
     protected boolean checkCandidates(int newID)
     {
-        if(candidates.contains((Integer)newID))
+        if(candidates.contains(newID))
         {
             return true;
         }

@@ -286,10 +286,6 @@ public class MainActivity extends AppCompatActivity {
         }else {
             //Prompt for admin passkey
             authenticateAdminAction();
-            //Disable/Enable appropriate buttons
-            addCandButton.setEnabled(false);    //Candidates cannot be added once voting has begun
-            beginButton.setEnabled(false);
-            endButton.setEnabled(true);
         }
 
     }
@@ -300,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
         final Dialog login = new Dialog(MainActivity.this);
         login.setContentView(R.layout.dialog_admin_passkey);
         login.setTitle("Administrator Authentication");
+        login.setCancelable(false);
 
         //Initialize the variables for the GUI
 
@@ -320,6 +317,10 @@ public class MainActivity extends AppCompatActivity {
                         startVoting = true;
                         //Show feedback to user
                         Toast.makeText(MainActivity.this,VOTE_START_MSG_ADMIN,Toast.LENGTH_SHORT).show();
+                        //Disable/Enable appropriate buttons
+                        addCandButton.setEnabled(false);    //Candidates cannot be added once voting has begun
+                        beginButton.setEnabled(false);
+                        endButton.setEnabled(true);
                         login.dismiss();
                     }else {
                         //Show feedback to user

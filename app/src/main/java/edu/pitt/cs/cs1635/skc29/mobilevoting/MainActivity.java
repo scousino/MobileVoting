@@ -455,14 +455,14 @@ public class MainActivity extends AppCompatActivity {
 
                 while(!nextPhone.equals("END")) //Adds Candidate IDs
                 {
-                    if(!phoneNumbers.contains(nextPhone))
+                    if(!phoneNumbers.contains(nextPhone) && candidates.contains(Integer.parseInt(nextVote)))
                     {
                         phoneNumbers.add(nextPhone);
                         votes.add(Integer.parseInt(nextVote));
                     }
                     else
                     {
-                        Toast.makeText(this,"ERROR - DUPLICATE PHONE NUMBER", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,"VOTING ERROR", Toast.LENGTH_LONG).show();
                         //Close input streams and readers
                         fileReader.close();
                         stream.close();

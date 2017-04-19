@@ -411,9 +411,10 @@ public class MainActivity extends AppCompatActivity {
     private void testSimulator()
     {
         numTestRun++;
-        if(numTestRun > 1) {
-            ex = Executors.newSingleThreadExecutor();
-        }
+
+        //Init executor for testing
+        ex = Executors.newSingleThreadExecutor();
+
         InputStream stream = getResources().openRawResource(R.raw.testfile);
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(stream));
         try

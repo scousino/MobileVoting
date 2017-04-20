@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private final int ADD_CANDIDATE_REQUEST = 1;
     private LinearLayout myResultLayout;
     private boolean receiverRegistered = false;
+    private boolean executorAlive = true;
     private int numTestRun = 0;
 
     @Override
@@ -238,6 +239,9 @@ public class MainActivity extends AppCompatActivity {
         //Disable/Enable appropriate buttons
         addCandButton.setEnabled(true);
         endButton.setEnabled(false);
+
+        //Executor dead
+        executorAlive = false;
     }
 
     private void databaseDestructPrompt() {
@@ -289,6 +293,12 @@ public class MainActivity extends AppCompatActivity {
         }else {
             //Prompt for admin passkey
             authenticateAdminAction();
+            if(!executorAlive) {
+                ex = Executors.newSingleThreadExecutor();
+            }
+            if(!receiverRegistered) {
+                registerReceiver(mySmsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
+            }
         }
 
     }
